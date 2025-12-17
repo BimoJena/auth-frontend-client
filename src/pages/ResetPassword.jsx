@@ -18,6 +18,11 @@ const ResetPassword = () => {
   const [otp, setOtp] = useState(0)
   const [isOtpSubmitted, setIsOtpSubmitted] = useState(false)
 
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+
 
   const inputRefs = React.useRef([])
 
@@ -51,6 +56,7 @@ const ResetPassword = () => {
 
   const onSubmitEmail = async (e) => {
     e.preventDefault();
+    setEmailLoading(true)
     try {
       const { data } = await axios.post(backend_url + '/api/auth/send-resetPaswword-otp', { email })
       data.success ? toast.success(data.message) : toast.error(data.message)
@@ -59,6 +65,8 @@ const ResetPassword = () => {
     } catch (err) {
       const message = err.response?.data?.message || "Something went wrong";
       toast.error(message);
+    } finally {
+      setEmailLoading(false)
     }
   }
 
@@ -71,6 +79,7 @@ const ResetPassword = () => {
 
   const onSubmitOtp = (e) => {
     e.preventDefault();
+    setOtpLoading(true)
 
     const otpValue = inputRefs.current
       .map(input => input?.value)
@@ -78,14 +87,14 @@ const ResetPassword = () => {
 
     if (otpValue.length !== 6) {
       toast.error("Please enter valid OTP");
+      setOtpLoading(false)
       return;
     }
 
     setOtp(otpValue);
     setIsOtpSubmitted(true);
+    setOtpLoading(false)
   };
-
-
 
   // const onSubmitNewPassword = async (e) => {
   //   e.preventDefault()
@@ -101,9 +110,11 @@ const ResetPassword = () => {
 
   const onSubmitNewPassword = async (e) => {
     e.preventDefault();
+    setPasswordLoading(true)
 
     if (!email || !otp || !newPassword) {
       toast.error("All fields are required");
+      setPasswordLoading(false)
       return;
     }
 
@@ -118,11 +129,10 @@ const ResetPassword = () => {
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setPasswordLoading(false)
     }
   };
-
-
-
 
   return (
 
@@ -144,7 +154,19 @@ const ResetPassword = () => {
             <input type="email" placeholder='Email id' className='bg-transparent outline-none w-full text-gray-300' value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
 
-          <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full mt-3 cursor-pointer'>Submit</button>
+          {/* <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full mt-3 cursor-pointer'>Submit</button> */}
+
+          <button
+            disabled={emailLoading}
+            className={`w-full py-2.5 rounded-full mt-3 text-white
+            ${emailLoading
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-indigo-500 to-indigo-900'
+              }`}
+          >
+            {emailLoading ? 'Processing...' : 'Submit'}
+          </button>
+
 
         </form>
 
@@ -170,7 +192,19 @@ const ResetPassword = () => {
             ))}
           </div>
 
-          <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full cursor-pointer'>Submit</button>
+          {/* <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full cursor-pointer'>Submit</button> */}
+
+          <button
+            disabled={otpLoading}
+            className={`w-full py-2.5 rounded-full text-white
+            ${otpLoading
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-indigo-500 to-indigo-900'
+              }`}
+          >
+            {otpLoading ? 'Verifying...' : 'Submit'}
+          </button>
+
 
         </form>
 
@@ -190,8 +224,18 @@ const ResetPassword = () => {
             <input type="password" placeholder='password' className='bg-transparent outline-none w-full text-gray-300' value={newPassword} onChange={e => setNewPassword(e.target.value)} required />
           </div>
 
-          <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full mt-3 cursor-pointer'>Submit</button>
+          {/* <button className='w-full py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-900 text-white rounded-full mt-3 cursor-pointer'>Submit</button> */}
 
+          <button
+            disabled={passwordLoading}
+            className={`w-full py-2.5 rounded-full mt-3 text-white
+            ${passwordLoading
+                ? 'bg-gray-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-indigo-500 to-indigo-900'
+              }`}
+          >
+            {passwordLoading ? 'Updating...' : 'Submit'}
+          </button>
         </form>
 
       }
