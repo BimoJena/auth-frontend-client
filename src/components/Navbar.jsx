@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
@@ -11,9 +11,12 @@ const Navbar = () => {
   const navigate = useNavigate()
 
   const { userData, backend_url, setUserData, setIsLoggedIn } = useContext(AppContext)
+  const [verifyLoading, setVerifyLoading] = useState(false);
+
 
   const sendVerificationOtp = async () => {
     try {
+      setVerifyLoading(true)
       axios.defaults.withCredentials = true
       const { data } = await axios.post(backend_url + '/api/auth/send-verify-otp')
       if (data.success) {
@@ -26,6 +29,8 @@ const Navbar = () => {
       // toast.error(err.message)
       const message = err.response?.data?.message || "Something went wrong";
       toast.error(message);
+    } finally {
+      setVerifyLoading(false)
     }
   }
 
@@ -59,7 +64,20 @@ const Navbar = () => {
 
             <ul className='list-none m-0 p-2  bg-gray-100 text-sm'>
 
-              {!userData.isAccountVerified && <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>Verify Email</li>}
+              {/* {!userData.isAccountVerified && <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>Verify Email</li>} */}
+
+              {!userData.isAccountVerified && (
+                <li
+                  onClick={!verifyLoading ? sendVerificationOtp : undefined}
+                  className="py-1 px-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2"
+                >
+                  {verifyLoading && (
+                    <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                  )}
+                  {verifyLoading ? 'Sending OTP...' : 'Verify Email'}
+                </li>
+              )}
+
 
               <li onClick={logout} className='py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10'>Logout</li>
 
