@@ -1,36 +1,152 @@
-import React, { useContext, useState } from 'react'
+// import React, { useContext, useState } from 'react'
+// import { assets } from '../assets/assets'
+// import { useNavigate } from 'react-router-dom'
+// import { AppContext } from '../context/AppContext'
+// import axios from 'axios'
+// import { toast } from 'react-toastify'
+
+
+// const Navbar = () => {
+
+//   const navigate = useNavigate()
+
+//   const { userData, backend_url, setUserData, setIsLoggedIn } = useContext(AppContext)
+//   const [verifyLoading, setVerifyLoading] = useState(false);
+
+
+//   const sendVerificationOtp = async () => {
+//     try {
+//       setVerifyLoading(true)
+//       axios.defaults.withCredentials = true
+//       const { data } = await axios.post(backend_url + '/api/auth/send-verify-otp')
+//       if (data.success) {
+//         navigate('/email-verify')
+//         toast.success(data.message)
+//       } else {
+//         toast.error(data.message)
+//       }
+//     } catch (err) {
+//       // toast.error(err.message)
+//       const message = err.response?.data?.message || "Something went wrong";
+//       toast.error(message);
+//     } finally {
+//       setVerifyLoading(false)
+//     }
+//   }
+
+//   const logout = async () => {
+//     try {
+//       axios.defaults.withCredentials = true
+//       const { data } = await axios.post(backend_url + '/api/auth/logout')
+//       data.success && setIsLoggedIn(false)
+//       data.success && setUserData(false)
+//       navigate('/')
+
+//     } catch (err) {
+//       // toast.error(err.message)
+//       const message = err.response?.data?.message || "Something went wrong";
+//       toast.error(message);
+//     }
+//   }
+
+
+//   return (
+//     <div className='w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0'>
+
+//       <img src={assets.logo} alt="" className='w-28 sm:w-32 ' />
+
+//       {userData ?
+
+//         <div className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white relative group'>
+//           {userData.name[0].toUpperCase()}
+
+//           <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
+
+//             <ul className='list-none m-0 p-2  bg-gray-100 text-sm'>
+
+//               {/* {!userData.isAccountVerified && <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>Verify Email</li>} */}
+
+//               {!userData.isAccountVerified && (
+//                 <li
+//                   onClick={!verifyLoading ? sendVerificationOtp : undefined}
+//                   className="py-1 px-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2"
+//                 >
+//                   {verifyLoading && (
+//                     <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+//                   )}
+//                   {verifyLoading ? 'Sending OTP...' : 'Verify Email'}
+//                 </li>
+//               )}
+
+
+//               <li onClick={logout} className='py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10'>Logout</li>
+
+//             </ul>
+
+//           </div>
+
+//         </div>
+//         :
+//         <button onClick={() => navigate('/login')}
+//           className='flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all cursor-pointer'>Login <img src={assets.arrow_icon} alt="" /></button>
+
+
+//       }
+
+
+
+//     </div>
+//   )
+// }
+
+// export default Navbar
+
+
+
+
+import React, { useContext, useState, useEffect } from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 
-
 const Navbar = () => {
-
   const navigate = useNavigate()
 
-  const { userData, backend_url, setUserData, setIsLoggedIn } = useContext(AppContext)
-  const [verifyLoading, setVerifyLoading] = useState(false);
+  const { userData, backend_url, setUserData, setIsLoggedIn } =
+    useContext(AppContext)
 
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  // close dropdown on outside click
+  useEffect(() => {
+    const closeMenu = () => setMenuOpen(false)
+    window.addEventListener('click', closeMenu)
+    return () => window.removeEventListener('click', closeMenu)
+  }, [])
 
   const sendVerificationOtp = async () => {
     try {
       setVerifyLoading(true)
       axios.defaults.withCredentials = true
-      const { data } = await axios.post(backend_url + '/api/auth/send-verify-otp')
+
+      const { data } = await axios.post(
+        backend_url + '/api/auth/send-verify-otp'
+      )
+
       if (data.success) {
-        navigate('/email-verify')
         toast.success(data.message)
+        navigate('/email-verify')
       } else {
         toast.error(data.message)
       }
     } catch (err) {
-      // toast.error(err.message)
-      const message = err.response?.data?.message || "Something went wrong";
-      toast.error(message);
+      toast.error(err.response?.data?.message || 'Something went wrong')
     } finally {
       setVerifyLoading(false)
+      setMenuOpen(false)
     }
   }
 
@@ -38,63 +154,79 @@ const Navbar = () => {
     try {
       axios.defaults.withCredentials = true
       const { data } = await axios.post(backend_url + '/api/auth/logout')
-      data.success && setIsLoggedIn(false)
-      data.success && setUserData(false)
-      navigate('/')
 
+      if (data.success) {
+        setIsLoggedIn(false)
+        setUserData(false)
+        navigate('/')
+      }
     } catch (err) {
-      // toast.error(err.message)
-      const message = err.response?.data?.message || "Something went wrong";
-      toast.error(message);
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    } finally {
+      setMenuOpen(false)
     }
   }
 
-
   return (
-    <div className='w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0'>
+    <div className="w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0 z-50">
+      <img
+        src={assets.logo}
+        alt="logo"
+        className="w-28 sm:w-32 cursor-pointer"
+        onClick={() => navigate('/')}
+      />
 
-      <img src={assets.logo} alt="" className='w-28 sm:w-32 ' />
-
-      {userData ?
-
-        <div className='w-8 h-8 flex justify-center items-center rounded-full bg-black text-white relative group'>
-          {userData.name[0].toUpperCase()}
-
-          <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10'>
-
-            <ul className='list-none m-0 p-2  bg-gray-100 text-sm'>
-
-              {/* {!userData.isAccountVerified && <li onClick={sendVerificationOtp} className='py-1 px-2 hover:bg-gray-200 cursor-pointer'>Verify Email</li>} */}
-
-              {!userData.isAccountVerified && (
-                <li
-                  onClick={!verifyLoading ? sendVerificationOtp : undefined}
-                  className="py-1 px-2 hover:bg-gray-200 cursor-pointer flex items-center gap-2"
-                >
-                  {verifyLoading && (
-                    <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
-                  )}
-                  {verifyLoading ? 'Sending OTP...' : 'Verify Email'}
-                </li>
-              )}
-
-
-              <li onClick={logout} className='py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10'>Logout</li>
-
-            </ul>
-
+      {userData ? (
+        <div className="relative">
+          {/* profile circle */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation()
+              setMenuOpen((prev) => !prev)
+            }}
+            className="w-8 h-8 flex justify-center items-center rounded-full bg-black text-white cursor-pointer select-none"
+          >
+            {userData.name?.[0]?.toUpperCase()}
           </div>
 
+          {/* dropdown */}
+          {menuOpen && (
+            <div className="absolute right-0 mt-2 w-40 bg-gray-100 rounded shadow-lg text-sm text-black">
+              <ul className="py-1">
+                {!userData.isAccountVerified && (
+                  <li
+                    onClick={!verifyLoading ? sendVerificationOtp : undefined}
+                    className={`px-3 py-2 flex items-center gap-2 ${
+                      verifyLoading
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'hover:bg-gray-200 cursor-pointer'
+                    }`}
+                  >
+                    {verifyLoading && (
+                      <span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></span>
+                    )}
+                    {verifyLoading ? 'Sending OTP...' : 'Verify Email'}
+                  </li>
+                )}
+
+                <li
+                  onClick={logout}
+                  className="px-3 py-2 hover:bg-gray-200 cursor-pointer"
+                >
+                  Logout
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
-        :
-        <button onClick={() => navigate('/login')}
-          className='flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all cursor-pointer'>Login <img src={assets.arrow_icon} alt="" /></button>
-
-
-      }
-
-
-
+      ) : (
+        <button
+          onClick={() => navigate('/login')}
+          className="flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all cursor-pointer"
+        >
+          Login <img src={assets.arrow_icon} alt="" />
+        </button>
+      )}
     </div>
   )
 }
