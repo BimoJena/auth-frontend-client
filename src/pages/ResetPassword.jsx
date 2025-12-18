@@ -184,7 +184,7 @@ const ResetPassword = () => {
           <div className='flex justify-between mb-8' onPaste={handlePaste}>
             {Array(6).fill(0).map((_, index) => (
               <input type="text" maxLength='1' key={index} required
-                className='w-12 h-12 bg-[#333A5C] text-white text-center text-xl rounded-md'
+                className='w-10 h-12 bg-[#333A5C] text-white text-center text-xl rounded-md'
                 ref={e => inputRefs.current[index] = e}
                 onInput={(e) => handleInput(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
